@@ -1,8 +1,8 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -54,13 +54,28 @@
     --radius: 0.875rem;
 
     /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(230 60% 96%) 0%, hsl(260 50% 94%) 50%, hsl(230 50% 92%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--lavender)));
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(230 60% 96%) 0%,
+      hsl(260 50% 94%) 50%,
+      hsl(230 50% 92%) 100%
+    );
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(var(--primary)),
+      hsl(var(--lavender))
+    );
     --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(230 30% 98%));
-    --gradient-sidebar: linear-gradient(180deg, hsl(230 55% 18%) 0%, hsl(250 45% 22%) 100%);
+    --gradient-sidebar: linear-gradient(
+      180deg,
+      hsl(230 55% 18%) 0%,
+      hsl(250 45% 22%) 100%
+    );
 
     /* Shadows */
-    --shadow-card: 0 4px 24px -4px hsl(230 40% 70% / 0.18), 0 1px 4px -1px hsl(230 40% 70% / 0.12);
+    --shadow-card:
+      0 4px 24px -4px hsl(230 40% 70% / 0.18),
+      0 1px 4px -1px hsl(230 40% 70% / 0.12);
     --shadow-primary: 0 8px 32px -8px hsl(var(--primary) / 0.35);
     --shadow-elevated: 0 16px 48px -12px hsl(230 40% 60% / 0.22);
 
@@ -112,11 +127,16 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Nunito', sans-serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Nunito", sans-serif;
   }
 }
 
@@ -142,12 +162,36 @@
     color: hsl(var(--primary-foreground));
     box-shadow: var(--shadow-primary);
     border-radius: var(--radius);
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(255 255% 255% / 0.2),
+      transparent
+    );
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+  }
+
+  .btn-primary:hover::before {
+    transform: translateX(100%);
   }
 
   .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 40px -8px hsl(var(--primary) / 0.45);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 44px -8px hsl(var(--primary) / 0.5);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0px);
   }
 
   .fade-in {
@@ -206,14 +250,33 @@
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     box-shadow: var(--shadow-card);
-    transition: all 0.25s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
+    position: relative;
+  }
+
+  .feature-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      transparent,
+      hsl(var(--primary) / 0.05),
+      transparent
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .feature-card:hover::before {
+    transform: translateX(100%);
   }
 
   .feature-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
     box-shadow: var(--shadow-elevated);
-    border-color: hsl(var(--primary) / 0.3);
+    border-color: hsl(var(--primary) / 0.4);
   }
 
   .nav-link-active {
@@ -242,32 +305,101 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-16px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.2); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 @keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: hsl(var(--muted)); }
-::-webkit-scrollbar-thumb { background: hsl(var(--primary) / 0.4); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: hsl(var(--primary) / 0.6); }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.4);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.6);
+}

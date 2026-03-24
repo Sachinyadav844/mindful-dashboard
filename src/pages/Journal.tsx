@@ -1,7 +1,7 @@
-import { BookOpen } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import JournalHistory from '@/components/JournalHistory';
+import { BookOpen } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import JournalHistory from "@/components/JournalHistory";
 
 const Journal = () => (
   <div className="page-container">
@@ -14,10 +14,15 @@ const Journal = () => (
           </div>
           <h1 className="text-3xl font-display font-bold">Mood Journal</h1>
         </div>
-        <p className="text-muted-foreground ml-12">Review your emotional history and track wellness trends over time.</p>
+        <p className="text-muted-foreground ml-12">
+          Review your emotional history and track wellness trends over time.
+        </p>
       </div>
 
-      <div className="glass-card p-6 animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+      <div
+        className="glass-card p-6 animate-fade-in-up"
+        style={{ animationDelay: "100ms" }}
+      >
         <JournalHistory />
       </div>
     </div>

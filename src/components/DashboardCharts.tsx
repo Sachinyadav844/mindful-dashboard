@@ -1,34 +1,75 @@
 import {
-  LineChart, Line, PieChart, Pie, Cell, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts';
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 const trendData = [
-  { day: 'Mon', score: 62 }, { day: 'Tue', score: 45 }, { day: 'Wed', score: 71 },
-  { day: 'Thu', score: 38 }, { day: 'Fri', score: 55 }, { day: 'Sat', score: 78 }, { day: 'Sun', score: 68 },
+  { day: "Mon", score: 62 },
+  { day: "Tue", score: 45 },
+  { day: "Wed", score: 71 },
+  { day: "Thu", score: 38 },
+  { day: "Fri", score: 55 },
+  { day: "Sat", score: 78 },
+  { day: "Sun", score: 68 },
 ];
 
 const emotionData = [
-  { name: 'Happy', value: 35, color: '#22c55e' },
-  { name: 'Neutral', value: 28, color: '#818cf8' },
-  { name: 'Sad', value: 18, color: '#60a5fa' },
-  { name: 'Surprised', value: 12, color: '#f59e0b' },
-  { name: 'Angry', value: 7, color: '#ef4444' },
+  { name: "Happy", value: 35, color: "#22c55e" },
+  { name: "Neutral", value: 28, color: "#818cf8" },
+  { name: "Sad", value: 18, color: "#60a5fa" },
+  { name: "Surprised", value: 12, color: "#f59e0b" },
+  { name: "Angry", value: 7, color: "#ef4444" },
 ];
 
 const riskData = [
-  { range: 'Low (>70)', count: 12, fill: '#22c55e' },
-  { range: 'Medium (35-70)', count: 8, fill: '#f59e0b' },
-  { range: 'High (<35)', count: 4, fill: '#ef4444' },
+  { range: "Low (>70)", count: 12, fill: "#22c55e" },
+  { range: "Medium (35-70)", count: 8, fill: "#f59e0b" },
+  { range: "High (<35)", count: 4, fill: "#ef4444" },
 ];
 
 const RADIAN = Math.PI / 180;
-const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+
+type PieLabelProps = {
+  cx: number;
+  cy: number;
+  midAngle: number;
+  innerRadius: number;
+  outerRadius: number;
+  percent: number;
+};
+
+const renderLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  percent,
+}: PieLabelProps) => {
   const r = innerRadius + (outerRadius - innerRadius) * 0.5;
   const x = cx + r * Math.cos(-midAngle * RADIAN);
   const y = cy + r * Math.sin(-midAngle * RADIAN);
   return percent > 0.08 ? (
-    <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={600}>
+    <text
+      x={x}
+      y={y}
+      fill="white"
+      textAnchor="middle"
+      dominantBaseline="central"
+      fontSize={11}
+      fontWeight={600}
+    >
       {`${(percent * 100).toFixed(0)}%`}
     </text>
   ) : null;
@@ -36,12 +77,32 @@ const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: an
 
 export const MoodTrendChart = () => (
   <ResponsiveContainer width="100%" height={220}>
-    <LineChart data={trendData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+    <LineChart
+      data={trendData}
+      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+    >
       <CartesianGrid strokeDasharray="3 3" stroke="hsl(230 25% 88%)" />
-      <XAxis dataKey="day" tick={{ fontSize: 12, fill: 'hsl(230 15% 52%)' }} />
-      <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: 'hsl(230 15% 52%)' }} />
-      <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid hsl(230 25% 88%)', fontSize: 12 }} />
-      <Line type="monotone" dataKey="score" stroke="hsl(230 65% 55%)" strokeWidth={2.5} dot={{ r: 4, fill: 'hsl(230 65% 55%)' }} activeDot={{ r: 6 }} name="Mood Score" />
+      <XAxis dataKey="day" tick={{ fontSize: 12, fill: "hsl(230 15% 52%)" }} />
+      <YAxis
+        domain={[0, 100]}
+        tick={{ fontSize: 12, fill: "hsl(230 15% 52%)" }}
+      />
+      <Tooltip
+        contentStyle={{
+          borderRadius: "8px",
+          border: "1px solid hsl(230 25% 88%)",
+          fontSize: 12,
+        }}
+      />
+      <Line
+        type="monotone"
+        dataKey="score"
+        stroke="hsl(230 65% 55%)"
+        strokeWidth={2.5}
+        dot={{ r: 4, fill: "hsl(230 65% 55%)" }}
+        activeDot={{ r: 6 }}
+        name="Mood Score"
+      />
     </LineChart>
   </ResponsiveContainer>
 );
@@ -49,12 +110,20 @@ export const MoodTrendChart = () => (
 export const EmotionPieChart = () => (
   <ResponsiveContainer width="100%" height={220}>
     <PieChart>
-      <Pie data={emotionData} cx="50%" cy="50%" outerRadius={85} dataKey="value" labelLine={false} label={renderLabel}>
+      <Pie
+        data={emotionData}
+        cx="50%"
+        cy="50%"
+        outerRadius={85}
+        dataKey="value"
+        labelLine={false}
+        label={renderLabel}
+      >
         {emotionData.map((entry, index) => (
           <Cell key={index} fill={entry.color} />
         ))}
       </Pie>
-      <Tooltip contentStyle={{ borderRadius: '8px', fontSize: 12 }} />
+      <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 12 }} />
       <Legend iconType="circle" iconSize={10} wrapperStyle={{ fontSize: 12 }} />
     </PieChart>
   </ResponsiveContainer>
@@ -62,13 +131,21 @@ export const EmotionPieChart = () => (
 
 export const RiskDistributionChart = () => (
   <ResponsiveContainer width="100%" height={180}>
-    <BarChart data={riskData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+    <BarChart
+      data={riskData}
+      margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
+    >
       <CartesianGrid strokeDasharray="3 3" stroke="hsl(230 25% 88%)" />
-      <XAxis dataKey="range" tick={{ fontSize: 11, fill: 'hsl(230 15% 52%)' }} />
-      <YAxis tick={{ fontSize: 11, fill: 'hsl(230 15% 52%)' }} />
-      <Tooltip contentStyle={{ borderRadius: '8px', fontSize: 12 }} />
+      <XAxis
+        dataKey="range"
+        tick={{ fontSize: 11, fill: "hsl(230 15% 52%)" }}
+      />
+      <YAxis tick={{ fontSize: 11, fill: "hsl(230 15% 52%)" }} />
+      <Tooltip contentStyle={{ borderRadius: "8px", fontSize: 12 }} />
       <Bar dataKey="count" radius={[6, 6, 0, 0]} name="Sessions">
-        {riskData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+        {riskData.map((entry, i) => (
+          <Cell key={i} fill={entry.fill} />
+        ))}
       </Bar>
     </BarChart>
   </ResponsiveContainer>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import api from "@/services/api";
 
 interface SentimentResult {
   sentiment: "positive" | "negative" | "neutral";
@@ -29,21 +30,36 @@ const TextSentimentBox = ({
   const analyze = async () => {
     if (!text.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    const sentiments: SentimentResult["sentiment"][] = [
-      "positive",
-      "negative",
-      "neutral",
-    ];
-    const s = sentiments[Math.floor(Math.random() * sentiments.length)];
-    const r: SentimentResult = {
-      sentiment: s,
-      score: 0.55 + Math.random() * 0.43,
-      keywords: ["stress", "work", "tired"].slice(0, 2),
-    };
-    setResult(r);
-    onResult?.(r);
-    setLoading(false);
+    try {
+      const response = await api.post("/analyze_text", { text });
+      const data = response.data;
+
+      if (data?.success && data?.sentiment) {
+        const r: SentimentResult = {
+          sentiment: data.sentiment,
+          score: Number(data.score || 0),
+          keywords: Array.isArray(data.keywords) ? data.keywords : [],
+        };
+        setResult(r);
+        onResult?.(r);
+      } else {
+        throw new Error(data?.message || "Invalid sentiment response from server");
+      }
+    } catch (error) {
+      console.error("Sentiment analysis error", error);
+      // fallback
+      const sentiments: SentimentResult["sentiment"][] = ["positive", "negative", "neutral"];
+      const s = sentiments[Math.floor(Math.random() * sentiments.length)];
+      const fallback: SentimentResult = {
+        sentiment: s,
+        score: 0.55 + Math.random() * 0.43,
+        keywords: ["stress", "work", "tired"].slice(0, 2),
+      };
+      setResult(fallback);
+      onResult?.(fallback);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

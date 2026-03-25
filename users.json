@@ -3,7 +3,14 @@
     "id": "1774365552862",
     "name": "Test User",
     "email": "test@example.com",
-    "password": "password123",
+    "password": "$2b$10$K1hBbHOLDRJadBM/B0I2iOLvMCcA3R3sfIuYBx/HjOdxuKBGi4g9W",
     "createdAt": "2026-03-24T15:19:12.862Z"
+  },
+  {
+    "id": "1774411878756",
+    "name": "sachin yadav",
+    "email": "sachinyadavv4534@gmail.com",
+    "password": "$2b$10$h91X.IFSaWGK44nQRRxL9u2FpBKLSA2P.XQnxEQ5vIH.JYs9D8Utq",
+    "createdAt": "2026-03-25T04:11:18.756Z"
   }
 ]

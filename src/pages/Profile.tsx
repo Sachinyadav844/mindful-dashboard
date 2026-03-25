@@ -1,14 +1,32 @@
+import { useEffect, useState } from "react";
 import { User, Mail, Activity, TrendingUp, Shield, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import api from "@/services/axiosConfig";
 import { useAuth } from "@/context/AuthContext";
 
 const Profile = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const [profileUser, setProfileUser] = useState(user);
 
-  const mockUser = user ?? {
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await api.get("/profile");
+        if (response?.data?.success && response.data.user) {
+          setProfileUser(response.data.user);
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile:", error);
+      }
+    };
+
+    if (isAuthenticated) fetchProfile();
+  }, [isAuthenticated]);
+
+  const mockUser = profileUser ?? user ?? {
     name: "Demo User",
     email: "demo@mentalmass.ai",
     totalSessions: 24,

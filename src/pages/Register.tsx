@@ -22,6 +22,7 @@ const Register = () => {
     try {
       await register(form.name, form.email, form.password);
       toast({ title: "Account created!", description: "Welcome to MENTALMASS." });
+      setForm({ name: "", email: "", password: "" });
       navigate("/dashboard");
     } catch (error) {
       console.error("Registration error", error);

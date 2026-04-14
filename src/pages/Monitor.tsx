@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Sliders,
   Camera,
@@ -18,6 +18,8 @@ import RecommendationCard from "@/components/RecommendationCard";
 import AgeDetectionCard from "@/components/AgeDetectionCard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import api from "@/services/api";
+import { useToast } from "@/hooks/use-toast";
 
 type SectionCardProps = {
   icon: React.ComponentType<{ className?: string }>;
@@ -46,15 +48,70 @@ const SectionCard = ({
 );
 
 const Monitor = () => {
-  const [score, setScore] = useState(62);
+  const [score, setScore] = useState<number | null>(null);
+  const [risk, setRisk] = useState<string | null>(null);
   const [calculating, setCalculating] = useState(false);
+  const [currentEmotion, setCurrentEmotion] = useState<string>("neutral");
+  const [currentSentiment, setCurrentSentiment] = useState<string>("neutral");
+  const [recommendation, setRecommendation] = useState<string>("");
+  const { toast } = useToast();
 
-  const recalculate = async () => {
+  const recalculateScore = useCallback(async (emotion: string, sentiment: string) => {
     setCalculating(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setScore(Math.floor(Math.random() * 80) + 15);
-    setCalculating(false);
+    try {
+      const response = await api.post("/calculate_score", { emotion, sentiment });
+      if (response.data?.success && response.data?.data) {
+        const d = response.data.data;
+        setScore(d.score);
+        setRisk(d.risk);
+
+        // Fetch recommendation
+        try {
+          const recResp = await api.get("/recommendation", {
+            params: { emotion, score: d.score },
+          });
+          if (recResp.data?.success && recResp.data?.data) {
+            setRecommendation(recResp.data.data.recommendation);
+          }
+        } catch {
+          // ignore recommendation errors
+        }
+      }
+    } catch (error) {
+      console.error("Score calculation error", error);
+      toast({
+        title: "Error",
+        description: "Could not calculate mood score. Is the backend running?",
+        variant: "destructive",
+      });
+    } finally {
+      setCalculating(false);
+    }
+  }, [toast]);
+
+  const handleEmotionResult = useCallback((result: { emotion: string; confidence: number }) => {
+    setCurrentEmotion(result.emotion);
+    recalculateScore(result.emotion, currentSentiment);
+    toast({
+      title: "Emotion Detected",
+      description: `${result.emotion} (${Math.round(result.confidence * 100)}% confidence)`,
+    });
+  }, [currentSentiment, recalculateScore, toast]);
+
+  const handleSentimentResult = useCallback((result: { sentiment: string; score: number }) => {
+    setCurrentSentiment(result.sentiment);
+    recalculateScore(currentEmotion, result.sentiment);
+    toast({
+      title: "Sentiment Analyzed",
+      description: `${result.sentiment} (${Math.round(result.score * 100)}% confidence)`,
+    });
+  }, [currentEmotion, recalculateScore, toast]);
+
+  const handleRecalculate = () => {
+    recalculateScore(currentEmotion, currentSentiment);
   };
+
+  const displayScore = score ?? 50;
 
   return (
     <div className="page-container">
@@ -79,7 +136,7 @@ const Monitor = () => {
             title="Facial Emotion Detection"
             color="bg-lavender-soft text-lavender"
           >
-            <WebcamCapture />
+            <WebcamCapture onResult={handleEmotionResult} />
           </SectionCard>
 
           <SectionCard
@@ -87,7 +144,7 @@ const Monitor = () => {
             title="Text Sentiment Analysis"
             color="bg-primary/10 text-primary"
           >
-            <TextSentimentBox />
+            <TextSentimentBox onResult={handleSentimentResult} />
           </SectionCard>
 
           <SectionCard
@@ -96,11 +153,16 @@ const Monitor = () => {
             color="bg-success-soft text-success"
           >
             <div className="flex flex-col items-center gap-4">
-              <MoodScoreCard score={score} />
+              <MoodScoreCard score={displayScore} />
+              {risk && (
+                <p className="text-xs text-muted-foreground">
+                  Risk Level: <span className="font-semibold">{risk}</span>
+                </p>
+              )}
               <Button
                 variant="outline"
                 size="sm"
-                onClick={recalculate}
+                onClick={handleRecalculate}
                 disabled={calculating}
                 className="w-full"
               >
@@ -121,9 +183,9 @@ const Monitor = () => {
             title="Risk Alert"
             color="bg-warning-soft text-warning"
           >
-            <RiskAlert score={score} />
+            <RiskAlert score={displayScore} />
             <p className="text-xs text-muted-foreground">
-              Score: {score}/100 · Updated just now
+              Score: {displayScore}/100 · Updated just now
             </p>
           </SectionCard>
 
@@ -132,16 +194,26 @@ const Monitor = () => {
             title="Personalized Recommendation"
             color="bg-lavender-soft text-lavender"
           >
-            <RecommendationCard
-              title="Try 5-Minute Mindful Breathing"
-              description="Based on your current mood score, we recommend a short breathing exercise. Box breathing (4-4-4-4 pattern) can help regulate your stress response and improve focus."
-              type="breathing"
-            />
-            <RecommendationCard
-              title="Evening Journaling"
-              description="Writing about your thoughts and feelings for just 10 minutes before bed can significantly improve your emotional processing and sleep quality."
-              type="journaling"
-            />
+            {recommendation ? (
+              <RecommendationCard
+                title="AI Recommendation"
+                description={recommendation}
+                type="breathing"
+              />
+            ) : (
+              <>
+                <RecommendationCard
+                  title="Try 5-Minute Mindful Breathing"
+                  description="Based on your current mood score, we recommend a short breathing exercise. Box breathing (4-4-4-4 pattern) can help regulate your stress response and improve focus."
+                  type="breathing"
+                />
+                <RecommendationCard
+                  title="Evening Journaling"
+                  description="Writing about your thoughts and feelings for just 10 minutes before bed can significantly improve your emotional processing and sleep quality."
+                  type="journaling"
+                />
+              </>
+            )}
           </SectionCard>
 
           <SectionCard

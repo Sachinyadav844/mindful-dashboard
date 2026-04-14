@@ -4,8 +4,9 @@ Flask API server with real AI models
 """
 
 import os
+import base64
 import logging
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 
 # Configure logging
@@ -45,14 +46,25 @@ def health():
 @app.route("/analyze_face", methods=["POST"])
 def api_analyze_face():
     try:
-        if "image" not in request.files:
-            return jsonify({"success": False, "message": "No image file provided"}), 400
+        image_bytes = None
 
-        image_file = request.files["image"]
-        image_bytes = image_file.read()
+        # Support file upload
+        if "image" in request.files:
+            image_file = request.files["image"]
+            image_bytes = image_file.read()
 
-        if len(image_bytes) == 0:
-            return jsonify({"success": False, "message": "Empty image file"}), 400
+        # Support base64 JSON payload
+        if image_bytes is None:
+            data = request.get_json(silent=True)
+            if data and "image" in data:
+                b64_str = data["image"]
+                # Strip data URI prefix if present
+                if "," in b64_str:
+                    b64_str = b64_str.split(",", 1)[1]
+                image_bytes = base64.b64decode(b64_str)
+
+        if not image_bytes or len(image_bytes) == 0:
+            return jsonify({"success": False, "message": "No image provided"}), 400
 
         result = analyze_emotion(image_bytes)
         return jsonify({"success": True, "data": result})
@@ -180,10 +192,8 @@ def api_journal_history():
 @app.route("/export_report", methods=["GET"])
 def api_export_report():
     from io import BytesIO
-    # Return a simple text report as placeholder
     report = "MENTALMASS Wellness Report\n\nNo data available yet."
     buf = BytesIO(report.encode())
-    from flask import send_file
     return send_file(buf, mimetype="application/pdf", as_attachment=True, download_name="wellness_report.pdf")
 
 

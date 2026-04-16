@@ -1,8 +1,11 @@
 flask==3.1.1
 flask-cors==5.0.1
+flask-socketio==5.3.7
+eventlet==0.37.0
 deepface==0.0.93
 opencv-python-headless==4.11.0.86
 transformers==4.48.1
 torch==2.5.1
 numpy==1.26.4
 requests==2.32.3
+reportlab==4.1.0

@@ -60,12 +60,38 @@ const Dashboard = () => {
 
   const handleExport = async () => {
     setExporting(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setExporting(false);
-    toast({
-      title: "Report Ready",
-      description: "Your wellness report has been downloaded.",
-    });
+    try {
+      const { generateReport } = await import("@/services/api");
+      const response = await generateReport({
+        name: "User",
+        age: "N/A",
+        emotion: "neutral",
+        sentiment: "neutral",
+        score: 50,
+        risk: "Moderate Risk",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `wellness_report_${Date.now()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast({
+        title: "Report Ready",
+        description: "Your wellness report has been downloaded.",
+      });
+    } catch (error) {
+      console.error("Export error", error);
+      toast({
+        title: "Export Failed",
+        description: "Could not generate report. Is the backend running?",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (

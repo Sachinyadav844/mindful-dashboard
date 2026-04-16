@@ -25,6 +25,7 @@ const navLinks = [
   { href: "/about", label: "About" },
   { href: "/features", label: "Features" },
   { href: "/monitor", label: "Monitor" },
+  { href: "/chatbot", label: "Chatbot" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/journal", label: "Journal" },
   { href: "/assessment", label: "Assessment" },

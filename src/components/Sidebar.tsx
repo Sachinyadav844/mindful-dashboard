@@ -9,6 +9,7 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
+  MessageSquareHeart,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -16,6 +17,7 @@ import { cn } from "@/lib/utils";
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/monitor", label: "Monitor", icon: Activity },
+  { href: "/chatbot", label: "Chatbot", icon: MessageSquareHeart },
   { href: "/journal", label: "Journal", icon: BookOpen },
   { href: "/assessment", label: "Assessment", icon: ClipboardList },
   { href: "/profile", label: "Profile", icon: User },

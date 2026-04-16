@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Features from "./pages/Features";
 import Monitor from "./pages/Monitor";
+import Chatbot from "./pages/Chatbot";
 import Dashboard from "./pages/Dashboard";
 import Journal from "./pages/Journal";
 import Assessment from "./pages/Assessment";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/features" element={<Features />} />
             <Route path="/monitor" element={<Monitor />} />
+            <Route path="/chatbot" element={<Chatbot />} />
             <Route
               path="/dashboard"
               element={

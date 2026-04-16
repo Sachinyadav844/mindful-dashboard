@@ -21,5 +21,8 @@ export const saveAssessment = (data: object) => api.post("/save_assessment", dat
 export const getJournalHistory = (filter?: string) =>
   api.get("/journal/history", { params: { filter } });
 export const exportReport = () => api.get("/export_report", { responseType: "blob" });
+export const generateReport = (data: object) =>
+  api.post("/generate_report", data, { responseType: "blob" });
+export const chatbot = (data: { message: string }) => api.post("/chatbot", data);
 
 export default api;

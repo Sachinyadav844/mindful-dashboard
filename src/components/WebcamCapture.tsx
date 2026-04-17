@@ -34,6 +34,7 @@ const WebcamCapture = ({
       const response = await api.post("/analyze_face", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log("[analyze_face] response:", response.data);
       if (response.data?.success && response.data?.data) {
         const res: FaceResult = {
           emotion: response.data.data.emotion,
@@ -41,6 +42,8 @@ const WebcamCapture = ({
         };
         setResult(res);
         onResult?.(res);
+      } else {
+        console.warn("[analyze_face] no data in response");
       }
     } catch (error) {
       console.error("Emotion analysis error", error);

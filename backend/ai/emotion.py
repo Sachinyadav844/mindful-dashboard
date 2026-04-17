@@ -23,18 +23,32 @@ def _get_deepface():
 
 
 def detect_and_crop_face(img_array: np.ndarray):
-    """Detect face using Haarcascade and crop the region."""
+    """Detect face using Haarcascade and crop the largest region with padding."""
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+    gray = cv2.equalizeHist(gray)  # improve detection under poor lighting
     cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
     face_cascade = cv2.CascadeClassifier(cascade_path)
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(48, 48))
+    faces = face_cascade.detectMultiScale(
+        gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60)
+    )
 
     if len(faces) == 0:
-        return None
+        # Try a more permissive pass
+        faces = face_cascade.detectMultiScale(
+            gray, scaleFactor=1.3, minNeighbors=3, minSize=(40, 40)
+        )
+        if len(faces) == 0:
+            return None
 
     # Take the largest face
     x, y, w, h = max(faces, key=lambda f: f[2] * f[3])
-    face_img = img_array[y:y+h, x:x+w]
+    # Add 15% padding around face for better context
+    pad = int(0.15 * max(w, h))
+    x1 = max(0, x - pad)
+    y1 = max(0, y - pad)
+    x2 = min(img_array.shape[1], x + w + pad)
+    y2 = min(img_array.shape[0], y + h + pad)
+    face_img = img_array[y1:y2, x1:x2]
     face_img = cv2.resize(face_img, (224, 224))
     return face_img
 
@@ -53,36 +67,46 @@ def analyze_emotion(image_bytes: bytes) -> dict:
             logger.warning("Could not decode image")
             return {"emotion": "neutral", "confidence": 0.3}
 
-        # Detect and crop face
+        # Detect and crop face (BGR)
         face_img = detect_and_crop_face(img)
 
         if face_img is None:
             logger.info("No face detected, returning neutral")
             return {"emotion": "neutral", "confidence": 0.3}
 
+        # Convert BGR -> RGB for DeepFace (expects RGB)
+        face_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
+
         DeepFace = _get_deepface()
 
         # Multi-inference: run 3 times for accuracy
         emotions_list = []
+        confidences_list = []
         last_result = None
 
         for _ in range(3):
             result = DeepFace.analyze(
-                img_path=face_img,
+                img_path=face_rgb,
                 actions=["emotion"],
                 enforce_detection=False,
                 detector_backend="opencv",
             )
             entry = result[0] if isinstance(result, list) else result
             emotions_list.append(entry["dominant_emotion"])
+            confidences_list.append(max(entry["emotion"].values()) / 100.0)
             last_result = entry
 
         # Majority vote
         vote_counts = Counter(emotions_list)
-        dominant_emotion = vote_counts.most_common(1)[0][0]
+        dominant_emotion, vote_count = vote_counts.most_common(1)[0]
 
-        # Confidence from the last analysis result's emotion scores
-        confidence = round(max(last_result["emotion"].values()) / 100.0, 2)
+        # Average confidence across runs
+        confidence = round(sum(confidences_list) / len(confidences_list), 2)
+
+        # Low-confidence fallback
+        if confidence < 0.5 and vote_count < 2:
+            logger.info(f"Low confidence ({confidence}), returning uncertain")
+            return {"emotion": "uncertain", "confidence": confidence}
 
         logger.info(f"Emotion detected: {dominant_emotion} (confidence: {confidence})")
         return {"emotion": dominant_emotion, "confidence": confidence}

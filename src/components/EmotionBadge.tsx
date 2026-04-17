@@ -38,6 +38,10 @@ const emotionConfig: Record<string, { color: string; emoji: string }> = {
     color: "bg-orange-50 text-orange-600 border border-orange-200",
     emoji: "🤢",
   },
+  uncertain: {
+    color: "bg-muted text-muted-foreground border border-border",
+    emoji: "🤔",
+  },
 };
 
 const EmotionBadge = ({

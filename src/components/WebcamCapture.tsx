@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, RefreshCw, Upload, Loader2, Video, VideoOff } from "lucide-react";
+import { Camera, RefreshCw, Upload, Loader2, Video, VideoOff, Scan } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EmotionBadge from "./EmotionBadge";
 import api from "@/services/api";
@@ -15,6 +15,7 @@ const WebcamCapture = ({
   onResult?: (result: FaceResult) => void;
 }) => {
   const [captured, setCaptured] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | Blob | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FaceResult | null>(null);
   const [webcamActive, setWebcamActive] = useState(false);
@@ -134,17 +135,26 @@ const WebcamCapture = ({
     if (!file) return;
     const url = URL.createObjectURL(file);
     setCaptured(url);
+    setPendingFile(file);
     setResult(null);
     stopWebcam();
-    analyzeImage(file);
   };
 
   const handleSnapAndAnalyze = () => {
     captureAndAnalyze();
   };
 
+  const handleAnalyzeClick = async () => {
+    if (pendingFile) {
+      await analyzeImage(pendingFile);
+    } else if (webcamActive) {
+      await captureAndAnalyze();
+    }
+  };
+
   const reset = () => {
     setCaptured(null);
+    setPendingFile(null);
     setResult(null);
     stopWebcam();
   };
@@ -244,6 +254,24 @@ const WebcamCapture = ({
           onChange={handleFile}
         />
       </div>
+
+      {(pendingFile || webcamActive) && (
+        <Button
+          onClick={handleAnalyzeClick}
+          disabled={loading}
+          className="btn-primary w-full flex items-center justify-center gap-2"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Analyzing...
+            </>
+          ) : (
+            <>
+              <Scan className="w-4 h-4" /> Analyze Emotion
+            </>
+          )}
+        </Button>
+      )}
 
       {result && (
         <div className="p-4 rounded-xl bg-muted/40 border border-border animate-fade-in">

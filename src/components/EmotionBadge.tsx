@@ -42,6 +42,10 @@ const emotionConfig: Record<string, { color: string; emoji: string }> = {
     color: "bg-muted text-muted-foreground border border-border",
     emoji: "🤔",
   },
+  stress: {
+    color: "bg-destructive/10 text-destructive border border-destructive/30",
+    emoji: "😟",
+  },
 };
 
 const EmotionBadge = ({

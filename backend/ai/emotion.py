@@ -103,13 +103,26 @@ def analyze_emotion(image_bytes: bytes) -> dict:
         # Average confidence across runs
         confidence = round(sum(confidences_list) / len(confidences_list), 2)
 
-        # Low-confidence fallback
-        if confidence < 0.5 and vote_count < 2:
-            logger.info(f"Low confidence ({confidence}), returning uncertain")
-            return {"emotion": "uncertain", "confidence": confidence}
+        # Map DeepFace raw emotion → project categories (happy / sad / neutral / stress)
+        raw = dominant_emotion.lower()
+        if raw == "happy":
+            mapped = "happy"
+        elif raw in ("sad",):
+            mapped = "sad"
+        elif raw in ("angry", "fear", "disgust"):
+            mapped = "stress"
+        else:
+            mapped = "neutral"
 
-        logger.info(f"Emotion detected: {dominant_emotion} (confidence: {confidence})")
-        return {"emotion": dominant_emotion, "confidence": confidence}
+        # Low-confidence fallback → safe neutral (always return a valid category)
+        if confidence < 0.4 and vote_count < 2:
+            logger.info(f"Low confidence ({confidence}), defaulting to neutral")
+            return {"emotion": "neutral", "confidence": confidence, "raw_emotion": raw}
+
+        logger.info(
+            f"Emotion: raw={raw} -> mapped={mapped} (confidence={confidence}, votes={vote_count}/3)"
+        )
+        return {"emotion": mapped, "confidence": confidence, "raw_emotion": raw}
 
     except Exception as e:
         logger.error(f"Emotion analysis error: {e}", exc_info=True)

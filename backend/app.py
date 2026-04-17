@@ -207,10 +207,12 @@ def api_profile():
 def api_analyze_face():
     try:
         image_bytes = None
+        source = None
 
         if "image" in request.files:
             image_file = request.files["image"]
             image_bytes = image_file.read()
+            source = "multipart"
 
         if image_bytes is None:
             data = request.get_json(silent=True)
@@ -219,11 +221,15 @@ def api_analyze_face():
                 if "," in b64_str:
                     b64_str = b64_str.split(",", 1)[1]
                 image_bytes = base64.b64decode(b64_str)
+                source = "base64"
 
         if not image_bytes or len(image_bytes) == 0:
+            logger.warning("/analyze_face: no image in request")
             return jsonify({"success": False, "message": "No image provided"}), 400
 
+        logger.info(f"/analyze_face: image received via {source} ({len(image_bytes)} bytes)")
         result = analyze_emotion(image_bytes)
+        logger.info(f"/analyze_face: result -> {result}")
 
         # Emit real-time update
         socketio.emit("emotion_update", result)
@@ -232,7 +238,7 @@ def api_analyze_face():
 
     except Exception as e:
         logger.error(f"/analyze_face error: {e}", exc_info=True)
-        return jsonify({"success": False, "message": "Error analyzing face"}), 500
+        return jsonify({"success": False, "message": "Analysis failed"}), 500
 
 
 # ── Text Sentiment Analysis ─────────────────────────────────────

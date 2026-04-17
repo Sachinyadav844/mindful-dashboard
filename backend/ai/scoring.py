@@ -11,6 +11,7 @@ EMOTION_SCORE_MAP = {
     "surprise": 75,
     "neutral": 60,
     "sad": 30,
+    "stress": 25,
     "angry": 20,
     "fear": 25,
     "disgust": 20,
